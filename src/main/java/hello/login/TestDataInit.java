@@ -2,6 +2,8 @@ package hello.login;
 
 import hello.login.domain.item.Item;
 import hello.login.domain.item.ItemRepository;
+import hello.login.domain.member.Member;
+import hello.login.domain.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +14,7 @@ import javax.annotation.PostConstruct;
 public class TestDataInit {
 
     private final ItemRepository itemRepository;
+    private final MemberRepository memberRepository;
 
     /**
      * 테스트용 데이터 추가
@@ -22,4 +25,12 @@ public class TestDataInit {
         itemRepository.save(new Item("itemB", 20000, 20));
     }
 
+    /**
+     * 테스트용 회원 추가
+     */
+    @PostConstruct
+    public void memberInit(){
+        memberRepository.save(new Member(1L , "login test", "첫번째 사람" , "1234!"));
+        memberRepository.save(new Member(2L , "login id", "두번째 사람" , "5678!"));
+    }
 }
