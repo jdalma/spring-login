@@ -30,7 +30,7 @@ public class TestDataInit {
      */
     @PostConstruct
     public void memberInit(){
-        memberRepository.save(new Member(1L , "login test", "첫번째 사람" , "1234!"));
-        memberRepository.save(new Member(2L , "login id", "두번째 사람" , "5678!"));
+        memberRepository.save(new Member(1L , "test1", "첫번째 사람" , "1234"));
+        memberRepository.save(new Member(2L , "test2", "두번째 사람" , "1234"));
     }
 }

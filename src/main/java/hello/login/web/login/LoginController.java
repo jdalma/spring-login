@@ -6,11 +6,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 @Slf4j
@@ -26,7 +29,7 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public String login(@Valid @ModelAttribute LoginForm form , BindingResult bindingResult){
+    public String login(@Valid @ModelAttribute LoginForm form , BindingResult bindingResult , HttpServletResponse response){
         log.info("loing binding result = {}" , bindingResult);
         if(bindingResult.hasErrors()){
             return "login/loginForm";
@@ -38,9 +41,22 @@ public class LoginController {
             return "login/loginForm";
         }
 
-        // 로그인 성공 처리 TODO
+        // 로그인 성공 - 만료 시간을 지정하지 않는 세션 쿠키 생성
+        Cookie cookie = new Cookie("memberId" , String.valueOf(loginMember.getId()));
+        response.addCookie(cookie);
 
         return "redirect:/";
     }
 
+    @PostMapping("/logout")
+    public String logout(HttpServletResponse response){
+        expiredCookie(response , "memberId");
+        return "redirect:/";
+    }
+
+    private void expiredCookie(HttpServletResponse response , String cookieName) {
+        Cookie cookie = new Cookie(cookieName, null);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+    }
 }
