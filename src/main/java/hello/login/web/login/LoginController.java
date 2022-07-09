@@ -8,10 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
@@ -86,7 +83,7 @@ public class LoginController {
         return "redirect:/";
     }
 
-    @PostMapping("/login")
+//    @PostMapping("/login")
     public String loginV3(@Valid @ModelAttribute LoginForm form , BindingResult bindingResult , HttpServletRequest request){
         log.info("loing binding result = {}" , bindingResult);
 
@@ -117,6 +114,33 @@ public class LoginController {
             session.invalidate();
         }
         return "redirect:/";
+    }
+
+    @PostMapping("/login")
+    public String loginV4(@Valid @ModelAttribute LoginForm form , BindingResult bindingResult ,
+                          @RequestParam(defaultValue = "/") String redirectURL ,
+                          HttpServletRequest request){
+        log.info("loing binding result = {}" , bindingResult);
+
+        if(bindingResult.hasErrors()){
+            return "login/loginForm";
+        }
+
+        Member loginMember = loginService.login(form.getLoginId() , form.getPassword());
+        if(loginMember == null){
+            bindingResult.reject("loginFail" , "아이디 또는 비밀번호가 일치하지 않습니다.");
+            return "login/loginForm";
+        }
+
+        // 로그인 성공
+        // 세션이 있으면 있는 세션 반환 , 없으면 신규 세션을 생성
+        HttpSession session = request.getSession();
+
+        // 세션에 로그인 회원 정보를 보관한다
+        session.setAttribute(SessionConst.LOGIN_MEMBER , loginMember);
+
+        // 필터에서 미인증 사용자가 로그인 화면으로 이동 후 정보 입력 후 로그인 요청 시 같이 담겨 있는 redirectURL을 넘겨준다
+        return "redirect:" + redirectURL;
     }
 
     private void expiredCookie(HttpServletResponse response , String cookieName) {
